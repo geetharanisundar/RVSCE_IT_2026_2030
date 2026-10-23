@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RVSCE-Student Portal - IT Section B Management Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RVSCE - Student Portal | IT Section B</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
@@ -24,12 +24,27 @@
               800: '#3730a3',
               900: '#312e81',
             }
+          },
+          screens: {
+            'xs': '420px',
           }
         }
       }
     }
   </script>
   <style>
+    /* Prevent pull-to-refresh on mobile if supported */
+    body {
+      overscroll-behavior-y: contain;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
     @media print {
       body * { visibility: hidden; }
       #printable-id-card, #printable-id-card * { visibility: visible; }
@@ -37,139 +52,188 @@
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col pb-20 md:pb-6 select-none sm:select-auto">
 
-  <!-- TOP NAVBAR -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
-      <div class="flex items-center space-x-3">
-        <div class="bg-brand-600 text-white p-2 rounded-lg shadow-sm">
-          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+  <!-- TOP APP BAR / HEADER -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14 sm:h-16">
+        <!-- Logo & Branding -->
+        <div class="flex items-center space-x-2.5">
+          <div class="bg-brand-600 text-white p-2 rounded-xl shadow-xs flex items-center justify-center">
+            <i data-lucide="graduation-cap" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-1.5">
+              <h1 class="font-bold text-base sm:text-lg text-slate-900 tracking-tight leading-none">RVSCE</h1>
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-brand-100 text-brand-800 uppercase tracking-wider">IT-B</span>
+            </div>
+            <p class="text-[11px] text-slate-500 font-medium hidden xs:block">Information Technology • 61 Students</p>
+          </div>
         </div>
-        <div>
-          <h1 class="font-bold text-lg text-slate-900 leading-tight">RVSCE</h1>
-          <p class="text-xs text-slate-500">Dept of Information Technology • Section B</p>
+
+        <!-- Quick Actions & Status -->
+        <div class="flex items-center space-x-2">
+          <!-- Live Pill (compact on small mobile) -->
+          <div class="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+            <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+            <span class="hidden xs:inline">Live Sync</span>
+            <span class="xs:hidden font-mono">LIVE</span>
+          </div>
+
+          <button onclick="exportCSV()" title="Export CSV" class="p-2 sm:px-3 sm:py-1.5 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 transition active:scale-95 flex items-center">
+            <i data-lucide="download" class="w-4 h-4 sm:mr-1.5 text-slate-600"></i>
+            <span class="hidden sm:inline">Export CSV</span>
+          </button>
+          <button onclick="resetData()" title="Reset Data" class="p-2 sm:px-3 sm:py-1.5 border border-rose-200 text-rose-700 rounded-xl text-xs font-medium bg-rose-50 hover:bg-rose-100 transition active:scale-95 flex items-center">
+            <i data-lucide="rotate-ccw" class="w-4 h-4 sm:mr-1.5"></i>
+            <span class="hidden sm:inline">Reset</span>
+          </button>
         </div>
-      </div>
-      <div class="flex items-center space-x-3">
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-          <span class="w-2 h-2 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Live System
-        </span>
-        <button onclick="exportCSV()" class="inline-flex items-center px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 transition">
-          <i data-lucide="download" class="w-3.5 h-3.5 mr-1.5"></i> Export CSV
-        </button>
-        <button onclick="resetData()" class="inline-flex items-center px-3 py-1.5 border border-rose-200 text-rose-700 rounded-lg text-xs font-medium bg-rose-50 hover:bg-rose-100 transition">
-          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 mr-1.5"></i> Reset
-        </button>
       </div>
     </div>
   </header>
 
-  <!-- NAVIGATION TABS -->
-  <nav class="bg-white border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-8">
-      <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="tab-button border-b-2 border-brand-600 py-3 px-1 text-sm font-semibold text-brand-600 flex items-center space-x-2">
-        <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Analytics & KPIs</span>
-      </button>
-      <button onclick="switchTab('directory')" id="tab-btn-directory" class="tab-button border-b-2 border-transparent py-3 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 flex items-center space-x-2">
-        <i data-lucide="users" class="w-4 h-4"></i><span>Student Directory (61)</span>
-      </button>
-      <button onclick="switchTab('attendance')" id="tab-btn-attendance" class="tab-button border-b-2 border-transparent py-3 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 flex items-center space-x-2">
-        <i data-lucide="fingerprint" class="w-4 h-4"></i><span>Automated Biometrics</span>
-      </button>
-      <button onclick="switchTab('fees')" id="tab-btn-fees" class="tab-button border-b-2 border-transparent py-3 px-1 text-sm font-medium text-slate-500 hover:text-slate-700 flex items-center space-x-2">
-        <i data-lucide="credit-card" class="w-4 h-4"></i><span>Scholarships & Fees</span>
-      </button>
+  <!-- DESKTOP TOP NAV / HORIZONTAL SCROLL FOR TABLET -->
+  <nav class="bg-white border-b border-slate-200 sticky top-14 sm:top-16 z-30 shadow-2xs">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex space-x-1 sm:space-x-8 overflow-x-auto no-scrollbar py-1 sm:py-0">
+        <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="tab-button whitespace-nowrap border-b-2 border-brand-600 py-2.5 sm:py-3 px-3 text-xs sm:text-sm font-semibold text-brand-600 flex items-center space-x-2 rounded-t-lg transition">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Overview</span>
+        </button>
+        <button onclick="switchTab('directory')" id="tab-btn-directory" class="tab-button whitespace-nowrap border-b-2 border-transparent py-2.5 sm:py-3 px-3 text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-800 flex items-center space-x-2 rounded-t-lg transition">
+          <i data-lucide="users" class="w-4 h-4"></i><span>Directory (61)</span>
+        </button>
+        <button onclick="switchTab('attendance')" id="tab-btn-attendance" class="tab-button whitespace-nowrap border-b-2 border-transparent py-2.5 sm:py-3 px-3 text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-800 flex items-center space-x-2 rounded-t-lg transition">
+          <i data-lucide="fingerprint" class="w-4 h-4"></i><span>Attendance & Turnstile</span>
+        </button>
+        <button onclick="switchTab('fees')" id="tab-btn-fees" class="tab-button border-b-2 border-transparent py-2.5 sm:py-3 px-3 text-xs sm:text-sm font-medium text-slate-500 hover:text-slate-800 flex items-center space-x-2 rounded-t-lg transition">
+          <i data-lucide="credit-card" class="w-4 h-4"></i><span>Scholarships & Dues</span>
+        </button>
+      </div>
     </div>
   </nav>
 
   <!-- MAIN CONTAINER -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+  <main class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full">
 
-    <!-- 1. DASHBOARD VIEW -->
-    <section id="view-dashboard" class="space-y-6">
-      <!-- KPI CARDS -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Total Enrollment</p>
-            <h3 class="text-2xl font-bold text-slate-900 mt-1" id="kpi-total">61</h3>
-            <p class="text-xs text-slate-500 mt-1">33 Boys • 28 Girls</p>
+    <!-- 1. DASHBOARD OVERVIEW VIEW -->
+    <section id="view-dashboard" class="space-y-4 sm:space-y-6">
+      
+      <!-- KPI CARDS: 2x2 Grid on Mobile, 4x1 on Large Screens -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <!-- KPI 1 -->
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] sm:text-xs font-bold uppercase text-slate-400 tracking-wider">Total Enrolled</span>
+            <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center"><i data-lucide="users" class="w-4 h-4"></i></div>
           </div>
-          <div class="bg-indigo-50 text-indigo-600 p-3 rounded-lg"><i data-lucide="users" class="w-6 h-6"></i></div>
+          <div class="mt-2 sm:mt-3">
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900" id="kpi-total">61</h3>
+            <p class="text-[11px] text-slate-500 mt-0.5 font-medium truncate">33 Boys • 28 Girls</p>
+          </div>
         </div>
 
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Hostel Resident Rate</p>
-            <h3 class="text-2xl font-bold text-slate-900 mt-1" id="kpi-hostel">17 <span class="text-sm font-normal text-slate-500">(27.8%)</span></h3>
-            <p class="text-xs text-slate-500 mt-1">4 Boys • 13 Girls</p>
+        <!-- KPI 2 -->
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] sm:text-xs font-bold uppercase text-slate-400 tracking-wider">Hostel Ratio</span>
+            <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="home" class="w-4 h-4"></i></div>
           </div>
-          <div class="bg-amber-50 text-amber-600 p-3 rounded-lg"><i data-lucide="home" class="w-6 h-6"></i></div>
+          <div class="mt-2 sm:mt-3">
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900" id="kpi-hostel">17 <span class="text-xs font-medium text-slate-400">(27.8%)</span></h3>
+            <p class="text-[11px] text-slate-500 mt-0.5 font-medium truncate">4 Boys • 13 Girls</p>
+          </div>
         </div>
 
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Scholarship Beneficiaries</p>
-            <h3 class="text-2xl font-bold text-slate-900 mt-1" id="kpi-scholarship">56</h3>
-            <p class="text-xs text-emerald-600 font-medium mt-1">PMSS: 22 | 7.5%: 10 | FG: 24</p>
+        <!-- KPI 3 -->
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] sm:text-xs font-bold uppercase text-slate-400 tracking-wider">Scholarships</span>
+            <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i data-lucide="award" class="w-4 h-4"></i></div>
           </div>
-          <div class="bg-emerald-50 text-emerald-600 p-3 rounded-lg"><i data-lucide="award" class="w-6 h-6"></i></div>
+          <div class="mt-2 sm:mt-3">
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900" id="kpi-scholarship">56</h3>
+            <p class="text-[11px] text-emerald-600 font-semibold mt-0.5 truncate">PMSS: 22 | 7.5: 10 | FG: 24</p>
+          </div>
         </div>
 
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Today's Attendance</p>
-            <h3 class="text-2xl font-bold text-slate-900 mt-1" id="kpi-attendance">0%</h3>
-            <p class="text-xs text-rose-500 font-medium mt-1" id="kpi-defaulters">0 Below 75% Cutoff</p>
+        <!-- KPI 4 -->
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] sm:text-xs font-bold uppercase text-slate-400 tracking-wider">Attendance</span>
+            <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center"><i data-lucide="user-check" class="w-4 h-4"></i></div>
           </div>
-          <div class="bg-sky-50 text-sky-600 p-3 rounded-lg"><i data-lucide="user-check" class="w-6 h-6"></i></div>
+          <div class="mt-2 sm:mt-3">
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900" id="kpi-attendance">0%</h3>
+            <p class="text-[11px] text-rose-500 font-semibold mt-0.5 truncate" id="kpi-defaulters">0 Below 75% Cutoff</p>
+          </div>
         </div>
       </div>
 
-      <!-- CHARTS SECTION -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-4">
-            <h4 class="font-bold text-slate-900 text-sm">Community Distribution</h4>
-            <span class="text-xs text-slate-500">Tamil Nadu DOTE Norms</span>
+      <!-- CHARTS: STACK ON MOBILE, GRID ON DESKTOP -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <!-- Community Distribution -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
+          <div class="flex justify-between items-center mb-3">
+            <div>
+              <h4 class="font-bold text-slate-900 text-xs sm:text-sm">Community Distribution</h4>
+              <p class="text-[11px] text-slate-400">Anna University / DOTE classification</p>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">61 Roster</span>
           </div>
-          <div class="h-64 relative">
+          <div class="h-56 sm:h-64 relative">
             <canvas id="communityChart"></canvas>
           </div>
         </div>
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-4">
-            <h4 class="font-bold text-slate-900 text-sm">Scholarship Breakdown (Tamil Nadu Govt.)</h4>
-            <span class="text-xs text-slate-500">Category split</span>
+
+        <!-- Scholarship Distribution -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
+          <div class="flex justify-between items-center mb-3">
+            <div>
+              <h4 class="font-bold text-slate-900 text-xs sm:text-sm">Government Scheme Allocation</h4>
+              <p class="text-[11px] text-slate-400">PMSS, 7.5% Govt School Quota, First Graduate</p>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">91.8% Subsidized</span>
           </div>
-          <div class="h-64 relative">
+          <div class="h-56 sm:h-64 relative flex items-center justify-center">
             <canvas id="scholarshipChart"></canvas>
           </div>
         </div>
       </div>
 
       <!-- CLASS REPRESENTATIVES HIGHLIGHT -->
-      <div class="bg-gradient-to-r from-brand-600 to-indigo-700 rounded-xl p-5 text-white shadow-sm">
+      <div class="bg-gradient-to-br from-brand-700 via-brand-600 to-indigo-800 rounded-2xl p-4 sm:p-5 text-white shadow-md">
         <div class="flex items-center space-x-2 mb-3">
           <i data-lucide="shield-check" class="w-5 h-5 text-amber-300"></i>
-          <h4 class="font-bold text-base">Class Representatives - IT Section B</h4>
+          <div>
+            <h4 class="font-bold text-sm sm:text-base leading-tight">Class Representatives & Leads</h4>
+            <p class="text-[11px] text-indigo-100 opacity-90">IT Section B Student Council</p>
+          </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" id="reps-container">
-          <!-- Dynamically populated -->
+        <div class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3" id="reps-container">
+          <!-- Populated dynamically -->
         </div>
       </div>
     </section>
 
     <!-- 2. STUDENT DIRECTORY VIEW -->
     <section id="view-directory" class="hidden space-y-4">
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div class="relative w-full md:w-96">
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
-          <input type="text" id="search-input" oninput="filterStudents()" placeholder="Search name, app no, mobile..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+      
+      <!-- Filter Bar -->
+      <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+        <!-- Search input -->
+        <div class="relative w-full">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3.5"></i>
+          <input type="text" id="search-input" oninput="filterStudents()" placeholder="Search student name, app no, mobile..." class="w-full pl-9 pr-8 py-2.5 bg-slate-50 sm:bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-3 text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
         </div>
-        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <select id="filter-community" onchange="filterStudents()" class="border border-slate-300 rounded-lg text-sm px-3 py-2 bg-white focus:outline-none">
+
+        <!-- Filter Dropdowns (Horizontal scrolling pill row on mobile) -->
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+          <select id="filter-community" onchange="filterStudents()" class="border border-slate-300 rounded-xl px-2.5 py-2 bg-slate-50 text-slate-700 font-medium focus:outline-none shrink-0">
             <option value="">All Communities</option>
             <option value="BC">BC</option>
             <option value="MBC/DNC">MBC/DNC</option>
@@ -178,33 +242,39 @@
             <option value="BCM">BCM</option>
           </select>
 
-          <select id="filter-residence" onchange="filterStudents()" class="border border-slate-300 rounded-lg text-sm px-3 py-2 bg-white focus:outline-none">
+          <select id="filter-residence" onchange="filterStudents()" class="border border-slate-300 rounded-xl px-2.5 py-2 bg-slate-50 text-slate-700 font-medium focus:outline-none shrink-0">
             <option value="">All Residences</option>
-            <option value="hostel">Hostellers Only</option>
-            <option value="dayscholar">Day Scholars Only</option>
+            <option value="hostel">Hostellers (17)</option>
+            <option value="dayscholar">Day Scholars (44)</option>
           </select>
 
-          <select id="filter-scholarship" onchange="filterStudents()" class="border border-slate-300 rounded-lg text-sm px-3 py-2 bg-white focus:outline-none">
+          <select id="filter-scholarship" onchange="filterStudents()" class="border border-slate-300 rounded-xl px-2.5 py-2 bg-slate-50 text-slate-700 font-medium focus:outline-none shrink-0">
             <option value="">All Scholarships</option>
-            <option value="pmss">PMSS</option>
-            <option value="7.5">7.5% Quota</option>
-            <option value="fg">First Graduate</option>
+            <option value="pmss">PMSS (22)</option>
+            <option value="7.5">7.5% Govt Quota (10)</option>
+            <option value="fg">First Graduate (24)</option>
           </select>
         </div>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <!-- MOBILE CARD LIST VIEW (< 768px) -->
+      <div class="block md:hidden space-y-2.5" id="mobile-student-cards">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- DESKTOP / TABLET DATA TABLE (>= 768px) -->
+      <div class="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse text-sm">
-            <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-xs tracking-wider">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
               <tr>
-                <th class="py-3 px-4">S.No</th>
-                <th class="py-3 px-4">App No</th>
+                <th class="py-3 px-3.5">#</th>
+                <th class="py-3 px-3">App No</th>
                 <th class="py-3 px-4">Student Name</th>
-                <th class="py-3 px-4">Community</th>
-                <th class="py-3 px-4">Mobile</th>
-                <th class="py-3 px-4">Residence / Role</th>
-                <th class="py-3 px-4">Scholarships</th>
+                <th class="py-3 px-3">Comm</th>
+                <th class="py-3 px-3">Mobile Contact</th>
+                <th class="py-3 px-3">Residence / Role</th>
+                <th class="py-3 px-3">Scholarship</th>
                 <th class="py-3 px-4 text-center">Action</th>
               </tr>
             </thead>
@@ -213,97 +283,129 @@
             </tbody>
           </table>
         </div>
-        <div class="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center">
-          <span id="showing-count">Showing 61 students</span>
-          <span>Dept of Information Technology</span>
-        </div>
+      </div>
+
+      <!-- Counter bar -->
+      <div class="bg-white p-3 rounded-xl border border-slate-200 text-xs text-slate-500 flex justify-between items-center shadow-2xs">
+        <span id="showing-count" class="font-semibold text-slate-800">Showing 61 students</span>
+        <span class="text-[11px] text-slate-400">RVS College of Engineering & Tech</span>
       </div>
     </section>
 
-    <!-- 3. AUTOMATED ATTENDANCE VIEW -->
-    <section id="view-attendance" class="hidden space-y-6">
-      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <!-- 3. AUTOMATED ATTENDANCE & BIOMETRIC VIEW -->
+    <section id="view-attendance" class="hidden space-y-4 sm:space-y-6">
+      
+      <!-- Top Action Banner -->
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h3 class="font-bold text-slate-900 text-base">Simulated Biometric / RFID Turnstile</h3>
-          <p class="text-xs text-slate-500 mt-1">Tap quick scan to simulate automated punch-in for IT Section B</p>
+          <h3 class="font-bold text-slate-900 text-sm sm:text-base leading-tight">Smart Biometric & Turnstile Scanner</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Automated roll-call tracking for Room 204 • IT Sec B</p>
         </div>
-        <div class="flex items-center space-x-2">
-          <button onclick="markAllAttendance(true)" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center">
-            <i data-lucide="check-check" class="w-4 h-4 mr-1.5"></i> Mark All Present
+        <div class="flex items-center space-x-2 w-full sm:w-auto">
+          <button onclick="markAllAttendance(true)" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition active:scale-95 flex items-center justify-center shadow-xs">
+            <i data-lucide="check-check" class="w-4 h-4 mr-1.5"></i> All Present
           </button>
-          <button onclick="markAllAttendance(false)" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold transition flex items-center">
-            <i data-lucide="x-circle" class="w-4 h-4 mr-1.5"></i> Reset Daily Attendance
+          <button onclick="markAllAttendance(false)" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition active:scale-95 flex items-center justify-center">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 mr-1.5"></i> Clear Today
           </button>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        
         <!-- Attendance Roster -->
-        <div class="md:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-            <span class="font-bold text-sm text-slate-800">Section Roll Call</span>
-            <span class="text-xs text-slate-500" id="attendance-summary-label">0 / 61 Checked In</span>
+        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden flex flex-col">
+          <div class="p-3.5 sm:p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+            <div>
+              <span class="font-bold text-xs sm:text-sm text-slate-800">Class Attendance Register</span>
+              <span class="block text-[10px] text-slate-500">Tap checkbox to toggle punch status</span>
+            </div>
+            <span class="text-xs font-bold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-lg border border-brand-200" id="attendance-summary-label">0 / 61 Present</span>
           </div>
-          <div class="divide-y divide-slate-100 max-h-[550px] overflow-y-auto" id="attendance-roster">
+          
+          <div class="divide-y divide-slate-100 max-h-[480px] sm:max-h-[550px] overflow-y-auto no-scrollbar" id="attendance-roster">
             <!-- Populated via JS -->
           </div>
         </div>
 
-        <!-- Simulation Terminal -->
-        <div class="space-y-4">
-          <div class="bg-slate-900 text-slate-100 p-5 rounded-xl shadow-md border border-slate-800">
-            <div class="flex items-center space-x-2 text-emerald-400 mb-3">
-              <i data-lucide="terminal" class="w-5 h-5"></i>
-              <h4 class="font-mono text-sm font-bold">Biometric Log Stream</h4>
+        <!-- Biometric Terminal Feed & Mobile Scanner button -->
+        <div class="space-y-3 sm:space-y-4">
+          <div class="bg-slate-900 text-slate-100 p-4 sm:p-5 rounded-2xl shadow-md border border-slate-800">
+            <div class="flex items-center justify-between text-emerald-400 mb-2.5">
+              <div class="flex items-center space-x-2">
+                <i data-lucide="terminal" class="w-4 h-4"></i>
+                <h4 class="font-mono text-xs font-bold uppercase tracking-wider">RFID Sensor Stream</h4>
+              </div>
+              <span class="flex h-2 w-2 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
             </div>
-            <div id="terminal-feed" class="font-mono text-xs text-slate-300 space-y-2 h-72 overflow-y-auto bg-slate-950 p-3 rounded-lg border border-slate-800">
-              <p class="text-slate-500">// System online. Turnstile RFID sensor ready...</p>
+            
+            <div id="terminal-feed" class="font-mono text-[11px] text-slate-300 space-y-1.5 h-48 sm:h-64 overflow-y-auto bg-slate-950 p-3 rounded-xl border border-slate-800 no-scrollbar">
+              <p class="text-slate-500">// Terminal online. Turnstile RFID listening...</p>
             </div>
-            <button onclick="simulateRandomScan()" class="mt-4 w-full py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-lg text-xs font-semibold flex items-center justify-center transition">
-              <i data-lucide="zap" class="w-3.5 h-3.5 mr-1.5"></i> Simulate Turnstile Tap
+
+            <!-- Big Mobile Touch Sensor Button -->
+            <button onclick="simulateRandomScan()" class="mt-3.5 w-full py-3 bg-brand-600 hover:bg-brand-500 active:scale-98 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center transition shadow-md shadow-brand-500/20">
+              <i data-lucide="fingerprint" class="w-4 h-4 mr-2 text-indigo-200"></i> Simulate RFID / Turnstile Tap
             </button>
           </div>
 
-          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-xs space-y-2">
-            <h5 class="font-semibold text-slate-900">Automated SMS Trigger Rule</h5>
-            <p class="text-slate-500">If cumulative attendance drops below <strong class="text-rose-600">75%</strong>, an automated alert SMS is dispatched to the registered mobile.</p>
+          <div class="bg-amber-50/70 border border-amber-200 p-3.5 rounded-2xl text-xs text-amber-900 flex items-start space-x-2.5">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 mt-0.5 shrink-0"></i>
+            <div>
+              <p class="font-bold">Autonomous SMS Dispatch</p>
+              <p class="text-[11px] text-amber-800/90 mt-0.5">Automated parent advisory triggered when cumulative semester attendance drops below 75%.</p>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- 4. SCHOLARSHIPS & FEES VIEW -->
-    <section id="view-fees" class="hidden space-y-6">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span class="text-xs font-semibold text-slate-500 uppercase">PMSS Beneficiaries</span>
-          <h4 class="text-2xl font-bold text-slate-900 mt-1">22 Students</h4>
-          <p class="text-xs text-emerald-600 mt-1">100% Tuition Waiver via SC/SCA Scheme</p>
+    <section id="view-fees" class="hidden space-y-4 sm:space-y-6">
+      
+      <!-- Metric Cards -->
+      <div class="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4">
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
+          <span class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">PMSS Scheme</span>
+          <h4 class="text-lg sm:text-2xl font-black text-slate-900 mt-1">22 Students</h4>
+          <p class="text-[11px] text-emerald-600 font-semibold mt-0.5">100% Tuition Waiver</p>
         </div>
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span class="text-xs font-semibold text-slate-500 uppercase">7.5% Govt Quota</span>
-          <h4 class="text-2xl font-bold text-slate-900 mt-1">10 Students</h4>
-          <p class="text-xs text-emerald-600 mt-1">Full Govt Fee Subvention</p>
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
+          <span class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">7.5% Govt Quota</span>
+          <h4 class="text-lg sm:text-2xl font-black text-slate-900 mt-1">10 Students</h4>
+          <p class="text-[11px] text-blue-600 font-semibold mt-0.5">Govt Sponsored Free</p>
         </div>
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span class="text-xs font-semibold text-slate-500 uppercase">First Graduate Concession</span>
-          <h4 class="text-2xl font-bold text-slate-900 mt-1">24 Students</h4>
-          <p class="text-xs text-indigo-600 mt-1">₹25,000 / Year Deducted</p>
+        <div class="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">
+          <span class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">First Graduate</span>
+          <h4 class="text-lg sm:text-2xl font-black text-slate-900 mt-1">24 Students</h4>
+          <p class="text-[11px] text-purple-600 font-semibold mt-0.5">₹25,000 / Yr Subsidy</p>
         </div>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-200 font-bold text-sm text-slate-800">Fee Assessment & Ledger Status</div>
+      <!-- Mobile Ledger Cards (< 768px) -->
+      <div class="block md:hidden space-y-2.5" id="mobile-fee-cards">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Desktop Ledger Table (>= 768px) -->
+      <div class="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+        <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+          <span class="font-bold text-sm text-slate-800">Academic Year Institutional Fee Ledger</span>
+          <span class="text-xs text-slate-500">Standard Base Fee: ₹55,000 / annum</span>
+        </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse text-sm">
-            <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-xs">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px]">
               <tr>
                 <th class="py-3 px-4">Student Name</th>
-                <th class="py-3 px-4">Scheme Tags</th>
+                <th class="py-3 px-4">Scheme Allocation</th>
                 <th class="py-3 px-4">Base Fee</th>
-                <th class="py-3 px-4">Subsidy / Concession</th>
-                <th class="py-3 px-4">Net Due Payable</th>
-                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4">Subsidized Amt</th>
+                <th class="py-3 px-4">Net Balance Due</th>
+                <th class="py-3 px-4 text-center">Status</th>
               </tr>
             </thead>
             <tbody id="fee-table-body" class="divide-y divide-slate-100 text-slate-700">
@@ -316,65 +418,100 @@
 
   </main>
 
-  <!-- STUDENT PROFILE & ID CARD MODAL -->
-  <div id="student-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
-    <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100">
-      <div class="bg-slate-900 p-4 text-white flex justify-between items-center">
-        <h4 class="font-bold text-sm flex items-center">
-          <i data-lucide="id-card" class="w-4 h-4 mr-2 text-brand-400"></i> Student Profile Card
-        </h4>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-white transition">
-          <i data-lucide="x" class="w-5 h-5"></i>
+  <!-- MOBILE BOTTOM NAVIGATION BAR (< 768px) -->
+  <div class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 px-2 py-1.5 shadow-lg">
+    <div class="grid grid-cols-4 gap-1 text-center">
+      <button onclick="switchTab('dashboard')" id="m-tab-dashboard" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-brand-600 font-bold transition">
+        <i data-lucide="layout-dashboard" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[10px] leading-tight">Overview</span>
+      </button>
+      <button onclick="switchTab('directory')" id="m-tab-directory" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-500 font-medium transition">
+        <i data-lucide="users" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[10px] leading-tight">Students</span>
+      </button>
+      <button onclick="switchTab('attendance')" id="m-tab-attendance" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-500 font-medium transition">
+        <i data-lucide="fingerprint" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[10px] leading-tight">Biometric</span>
+      </button>
+      <button onclick="switchTab('fees')" id="m-tab-fees" class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl text-slate-500 font-medium transition">
+        <i data-lucide="credit-card" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[10px] leading-tight">Fees</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STUDENT PROFILE & ID CARD MODAL (Responsive Bottom-sheet / Dialog) -->
+  <div id="student-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden backdrop-blur-xs transition-opacity duration-200">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[90vh] sm:max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-slate-100 animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200">
+      
+      <!-- Modal Header -->
+      <div class="bg-slate-900 px-5 py-4 text-white flex justify-between items-center shrink-0">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="id-card" class="w-5 h-5 text-brand-400"></i>
+          <h4 class="font-bold text-sm sm:text-base">Institutional Identity Card</h4>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <div class="p-6" id="printable-id-card">
-        <div class="border-2 border-brand-500 rounded-xl p-5 bg-gradient-to-b from-brand-50/50 to-white relative overflow-hidden shadow-sm">
-          <div class="absolute top-2 right-2 text-xs font-bold px-2 py-0.5 rounded bg-brand-100 text-brand-800" id="modal-branch">
-            IT - SEC B
+      <!-- Printable ID Card Body -->
+      <div class="p-4 sm:p-6 overflow-y-auto" id="printable-id-card">
+        <div class="border-2 border-brand-500 rounded-2xl p-4 sm:p-5 bg-gradient-to-b from-brand-50/60 via-white to-slate-50 relative overflow-hidden shadow-xs">
+          
+          <div class="flex justify-between items-start mb-3 sm:mb-4">
+            <div>
+              <span class="text-[10px] font-bold tracking-widest text-brand-800 uppercase block">RVS College of Engg & Tech</span>
+              <p class="text-xs text-slate-500">Autonomous &bull; Dindigul, Tamil Nadu</p>
+            </div>
+            <div class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-brand-100 text-brand-800 border border-brand-200" id="modal-branch">
+              IT - SEC B
+            </div>
           </div>
-          <div class="flex items-center space-x-4 mb-4">
-            <div class="w-16 h-16 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-2xl shadow-md border-2 border-white" id="modal-avatar">
+
+          <div class="flex items-center space-x-3.5 mb-4">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-brand-600 text-white flex items-center justify-center font-black text-xl sm:text-2xl shadow-md border-2 border-white shrink-0" id="modal-avatar">
               --
             </div>
-            <div>
-              <h3 class="font-bold text-lg text-slate-900 leading-tight" id="modal-name">Student Name</h3>
-              <p class="text-xs text-slate-500">App No: <span class="font-mono font-medium text-slate-700" id="modal-appno">------</span></p>
-              <div class="flex gap-1.5 mt-1" id="modal-tags"></div>
+            <div class="min-w-0 flex-1">
+              <h3 class="font-extrabold text-base sm:text-lg text-slate-900 leading-tight truncate" id="modal-name">Student Name</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Application No: <span class="font-mono font-bold text-slate-800" id="modal-appno">------</span></p>
+              <div class="flex gap-1.5 mt-1.5 flex-wrap" id="modal-tags"></div>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3 text-xs border-t border-slate-200 pt-3">
+          <div class="grid grid-cols-2 gap-2.5 sm:gap-3 text-xs border-t border-slate-200 pt-3 bg-white/70 p-2.5 rounded-xl">
             <div>
-              <span class="text-slate-400 block">Community</span>
-              <span class="font-semibold text-slate-800" id="modal-community">BC</span>
+              <span class="text-slate-400 text-[10px] uppercase font-bold block">Community</span>
+              <span class="font-bold text-slate-800" id="modal-community">BC</span>
             </div>
             <div>
-              <span class="text-slate-400 block">Contact Phone</span>
-              <span class="font-semibold font-mono text-slate-800" id="modal-phone">----------</span>
+              <span class="text-slate-400 text-[10px] uppercase font-bold block">Mobile Phone</span>
+              <a href="#" id="modal-phone-link" class="font-bold font-mono text-brand-600 underline block" id="modal-phone">----------</a>
             </div>
             <div>
-              <span class="text-slate-400 block">Residence Type</span>
-              <span class="font-semibold text-slate-800" id="modal-residence">Day Scholar</span>
+              <span class="text-slate-400 text-[10px] uppercase font-bold block">Accommodation</span>
+              <span class="font-bold text-slate-800" id="modal-residence">Day Scholar</span>
             </div>
             <div>
-              <span class="text-slate-400 block">Semester Attendance</span>
-              <span class="font-semibold text-emerald-600" id="modal-attendance">94.2%</span>
+              <span class="text-slate-400 text-[10px] uppercase font-bold block">Semester Attendance</span>
+              <span class="font-bold text-emerald-600" id="modal-attendance">94.2%</span>
             </div>
           </div>
 
-          <div class="mt-4 pt-3 border-t border-dashed border-slate-300 flex justify-between items-center text-[10px] text-slate-400">
-            <span>EduPulse Verified Identity</span>
-            <span>Academic Year 2026-27</span>
+          <div class="mt-4 pt-2.5 border-t border-dashed border-slate-300 flex justify-between items-center text-[10px] text-slate-400">
+            <span class="flex items-center"><i data-lucide="shield" class="w-3 h-3 mr-1 text-brand-500"></i> RFID Biometric Certified</span>
+            <span>Session 2026-27</span>
           </div>
         </div>
       </div>
 
-      <div class="bg-slate-50 px-6 py-3 border-t border-slate-200 flex justify-end space-x-2">
-        <button onclick="window.print()" class="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold flex items-center transition">
-          <i data-lucide="printer" class="w-3.5 h-3.5 mr-1.5"></i> Print ID Card
+      <!-- Action Footer -->
+      <div class="bg-slate-50 px-4 py-3 border-t border-slate-200 flex justify-end space-x-2 shrink-0">
+        <button onclick="window.print()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center transition active:scale-95 shadow-xs">
+          <i data-lucide="printer" class="w-4 h-4 mr-1.5"></i> Print ID Card
         </button>
-        <button onclick="closeModal()" class="px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition">
+        <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition active:scale-95">
           Close
         </button>
       </div>
@@ -382,7 +519,7 @@
   </div>
 
   <script>
-    // 61 STUDENTS DATA FROM IT SECTION B
+    // 61 STUDENTS DATA FROM SOURCE PDF (IT SECTION B)
     const rawStudentData = [
       { sno: 1, appNo: "390715", name: "ABINAYA K", comm: "SCA", mobile: "8428175086", branch: "IT", pmss: true, sevenFive: false, fg: false, hostel: null, rep: false },
       { sno: 2, appNo: "323360", name: "ABITHA S", comm: "BC", mobile: "9384482462", branch: "IT", pmss: false, sevenFive: false, fg: false, hostel: null, rep: false },
@@ -450,13 +587,17 @@
     function getStoredData() {
       const stored = localStorage.getItem('edupulse_it_sec_b');
       if (stored) {
-        return JSON.parse(stored);
+        try {
+          return JSON.parse(stored);
+        } catch (e) {
+          console.error(e);
+        }
       }
       const initial = rawStudentData.map(s => ({
         ...s,
         presentToday: false,
         totalClasses: 80,
-        attendedClasses: Math.floor(Math.random() * 20) + 60
+        attendedClasses: Math.floor(Math.random() * 16) + 65 // 80%-100%
       }));
       localStorage.setItem('edupulse_it_sec_b', JSON.stringify(initial));
       return initial;
@@ -470,67 +611,149 @@
     }
 
     function resetData() {
-      if (confirm('Reset all Section B student details and attendance to original values?')) {
+      if (confirm('Reset Section B student dataset, attendance, and local records?')) {
         localStorage.removeItem('edupulse_it_sec_b');
         students = getStoredData();
         renderAll();
       }
     }
 
+    // TAB NAVIGATION (Syncs desktop header + mobile bottom bar)
     function switchTab(tabId) {
       ['dashboard', 'directory', 'attendance', 'fees'].forEach(tab => {
-        document.getElementById(`view-${tab}`).classList.add('hidden');
-        const btn = document.getElementById(`tab-btn-${tab}`);
-        btn.classList.remove('border-brand-600', 'text-brand-600', 'font-semibold');
-        btn.classList.add('border-transparent', 'text-slate-500');
+        const view = document.getElementById(`view-${tab}`);
+        if (view) view.classList.add('hidden');
+
+        // Desktop tab styling
+        const dtBtn = document.getElementById(`tab-btn-${tab}`);
+        if (dtBtn) {
+          dtBtn.classList.remove('border-brand-600', 'text-brand-600', 'font-semibold');
+          dtBtn.classList.add('border-transparent', 'text-slate-500');
+        }
+
+        // Mobile bottom nav styling
+        const mBtn = document.getElementById(`m-tab-${tab}`);
+        if (mBtn) {
+          mBtn.classList.remove('text-brand-600', 'font-bold');
+          mBtn.classList.add('text-slate-500', 'font-medium');
+        }
       });
-      document.getElementById(`view-${tabId}`).classList.remove('hidden');
-      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-      activeBtn.classList.remove('border-transparent', 'text-slate-500');
-      activeBtn.classList.add('border-brand-600', 'text-brand-600', 'font-semibold');
+
+      // Activate selected
+      const activeView = document.getElementById(`view-${tabId}`);
+      if (activeView) activeView.classList.remove('hidden');
+
+      const activeDtBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (activeDtBtn) {
+        activeDtBtn.classList.remove('border-transparent', 'text-slate-500');
+        activeDtBtn.classList.add('border-brand-600', 'text-brand-600', 'font-semibold');
+      }
+
+      const activeMBtn = document.getElementById(`m-tab-${tabId}`);
+      if (activeMBtn) {
+        activeMBtn.classList.remove('text-slate-500', 'font-medium');
+        activeMBtn.classList.add('text-brand-600', 'font-bold');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // HELPER: Generate Badge HTML
+    function getScholarshipBadges(s) {
+      let schBadges = [];
+      if (s.pmss) schBadges.push('<span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">PMSS</span>');
+      if (s.sevenFive) schBadges.push('<span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">7.5%</span>');
+      if (s.fg) schBadges.push('<span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">FG</span>');
+      return schBadges.length ? schBadges.join(' ') : '<span class="text-slate-400 text-xs">—</span>';
+    }
+
+    function getResidenceBadge(s) {
+      if (s.hostel) {
+        const isGirls = s.hostel.includes("Girl");
+        return `<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${isGirls ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800'}">${s.hostel}</span>`;
+      }
+      return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600">Day Scholar</span>';
+    }
+
+    // RENDER DIRECTORY: Mobile Cards + Desktop Table
     function renderDirectory(list = students) {
+      // 1. Mobile Cards (< 768px)
+      const mContainer = document.getElementById('mobile-student-cards');
+      mContainer.innerHTML = '';
+
+      if (list.length === 0) {
+        mContainer.innerHTML = `<div class="p-6 bg-white rounded-2xl text-center text-xs text-slate-400 border border-slate-200">No student records match search criteria.</div>`;
+      }
+
+      list.forEach((s) => {
+        const mCard = document.createElement('div');
+        mCard.className = 'bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-2.5 transition active:bg-slate-50';
+        mCard.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div class="flex items-center space-x-2.5 min-w-0">
+              <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-700 font-extrabold flex items-center justify-center text-xs shrink-0 border border-brand-100">
+                ${s.name.charAt(0)}
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center space-x-1.5">
+                  <h4 class="font-bold text-xs sm:text-sm text-slate-900 truncate leading-tight">${s.name}</h4>
+                  ${s.rep ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-black bg-indigo-100 text-indigo-700">REP</span>' : ''}
+                </div>
+                <p class="text-[10px] text-slate-400 font-mono mt-0.5">#${s.sno} &bull; App: ${s.appNo} &bull; ${s.comm}</p>
+              </div>
+            </div>
+            <button onclick="viewProfile('${s.appNo}')" class="px-2.5 py-1 text-[11px] font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 rounded-lg transition shrink-0">
+              ID Card
+            </button>
+          </div>
+
+          <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-100">
+            <div class="flex items-center space-x-1.5 flex-wrap">
+              ${getResidenceBadge(s)}
+              ${getScholarshipBadges(s)}
+            </div>
+            <a href="tel:${s.mobile}" class="inline-flex items-center space-x-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg shrink-0">
+              <i data-lucide="phone" class="w-3 h-3 text-brand-600"></i>
+              <span>${s.mobile}</span>
+            </a>
+          </div>
+        `;
+        mContainer.appendChild(mCard);
+      });
+
+      // 2. Desktop Table (>= 768px)
       const tbody = document.getElementById('student-table-body');
       tbody.innerHTML = '';
       list.forEach((s) => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/80 transition';
-
-        let badgeRes = '<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700">Day Scholar</span>';
-        if (s.hostel) {
-          const isGirls = s.hostel.includes("Girl");
-          badgeRes = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${isGirls ? 'bg-purple-100 text-purple-700' : 'bg-amber-100 text-amber-700'}">${s.hostel}</span>`;
-        }
-        if (s.rep) {
-          badgeRes += ' <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700 ml-1">Rep</span>';
-        }
-
-        let schBadges = [];
-        if (s.pmss) schBadges.push('<span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">PMSS</span>');
-        if (s.sevenFive) schBadges.push('<span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800">7.5%</span>');
-        if (s.fg) schBadges.push('<span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-violet-100 text-violet-800">FG</span>');
-        if (schBadges.length === 0) schBadges.push('<span class="text-xs text-slate-400">—</span>');
-
         tr.innerHTML = `
-          <td class="py-3 px-4 font-mono text-xs text-slate-500">${s.sno}</td>
-          <td class="py-3 px-4 font-mono font-medium text-xs text-slate-700">${s.appNo}</td>
-          <td class="py-3 px-4 font-semibold text-slate-900">${s.name}</td>
-          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700">${s.comm}</span></td>
-          <td class="py-3 px-4 font-mono text-xs text-slate-600">${s.mobile}</td>
-          <td class="py-3 px-4">${badgeRes}</td>
-          <td class="py-3 px-4"><div class="flex gap-1 flex-wrap">${schBadges.join('')}</div></td>
+          <td class="py-3 px-3.5 font-mono text-xs text-slate-400">${s.sno}</td>
+          <td class="py-3 px-3 font-mono font-bold text-xs text-slate-700">${s.appNo}</td>
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-900">${s.name}</div>
+            ${s.rep ? '<span class="inline-block text-[10px] font-extrabold text-indigo-600">Class Representative</span>' : ''}
+          </td>
+          <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700">${s.comm}</span></td>
+          <td class="py-3 px-3 font-mono text-xs text-slate-600">
+            <a href="tel:${s.mobile}" class="hover:text-brand-600 underline">${s.mobile}</a>
+          </td>
+          <td class="py-3 px-3">${getResidenceBadge(s)}</td>
+          <td class="py-3 px-3"><div class="flex gap-1 flex-wrap">${getScholarshipBadges(s)}</div></td>
           <td class="py-3 px-4 text-center">
-            <button onclick="viewProfile('${s.appNo}')" class="px-2.5 py-1 text-xs font-medium text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 rounded-md transition">
+            <button onclick="viewProfile('${s.appNo}')" class="px-3 py-1 text-xs font-bold text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 rounded-lg transition">
               Profile
             </button>
           </td>
         `;
         tbody.appendChild(tr);
       });
+
       document.getElementById('showing-count').innerText = `Showing ${list.length} of ${students.length} students`;
+      lucide.createIcons();
     }
 
+    // RENDER ATTENDANCE ROSTER
     function renderAttendance() {
       const roster = document.getElementById('attendance-roster');
       roster.innerHTML = '';
@@ -540,18 +763,18 @@
         if (s.presentToday) presentCount++;
         const pct = Math.round((s.attendedClasses / s.totalClasses) * 100);
         const item = document.createElement('div');
-        item.className = 'p-3 flex items-center justify-between hover:bg-slate-50 transition';
+        item.className = 'p-3 sm:p-3.5 flex items-center justify-between hover:bg-slate-50 transition active:bg-slate-100/70';
         item.innerHTML = `
-          <div class="flex items-center space-x-3">
-            <input type="checkbox" onchange="togglePresent('${s.appNo}')" ${s.presentToday ? 'checked' : ''} class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
-            <div>
-              <p class="font-semibold text-xs text-slate-900">${s.name} <span class="font-mono text-slate-400 font-normal">(${s.appNo})</span></p>
-              <p class="text-[11px] text-slate-500">${s.hostel || 'Day Scholar'} • ${s.mobile}</p>
+          <label class="flex items-center space-x-3 cursor-pointer min-w-0 flex-1 pr-2">
+            <input type="checkbox" onchange="togglePresent('${s.appNo}')" ${s.presentToday ? 'checked' : ''} class="w-5 h-5 rounded-lg border-slate-300 text-brand-600 focus:ring-brand-500 shrink-0">
+            <div class="min-w-0">
+              <p class="font-bold text-xs text-slate-900 truncate">${s.name}</p>
+              <p class="text-[10px] text-slate-400 font-mono truncate">App ${s.appNo} &bull; ${s.hostel || 'Day Scholar'}</p>
             </div>
-          </div>
-          <div class="flex items-center space-x-3">
-            <span class="text-xs font-mono font-semibold ${pct < 75 ? 'text-rose-600' : 'text-slate-600'}">${pct}% Overall</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${s.presentToday ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'}">
+          </label>
+          <div class="flex items-center space-x-2 shrink-0">
+            <span class="text-[11px] font-mono font-bold ${pct < 75 ? 'text-rose-600' : 'text-slate-600'}">${pct}%</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${s.presentToday ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-400'}">
               ${s.presentToday ? 'IN' : 'ABSENT'}
             </span>
           </div>
@@ -564,11 +787,66 @@
       document.getElementById('kpi-attendance').innerText = `${overallRate}%`;
     }
 
+    // RENDER FEES: Mobile Card View + Desktop Table
     function renderFees() {
-      const tbody = document.getElementById('fee-table-body');
-      tbody.innerHTML = '';
       const baseTuition = 55000;
 
+      // Mobile cards
+      const mContainer = document.getElementById('mobile-fee-cards');
+      mContainer.innerHTML = '';
+
+      students.forEach(s => {
+        let concession = 0;
+        let note = "Standard Tuition";
+
+        if (s.pmss) {
+          concession = baseTuition;
+          note = "100% PMSS Subsidy";
+        } else if (s.sevenFive) {
+          concession = baseTuition;
+          note = "100% 7.5 Govt Quota";
+        } else if (s.fg) {
+          concession = 25000;
+          note = "FG Deduction ₹25,000";
+        }
+
+        const netPayable = baseTuition - concession;
+
+        const card = document.createElement('div');
+        card.className = 'bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs space-y-2';
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-bold text-xs sm:text-sm text-slate-900">${s.name}</h4>
+              <p class="text-[10px] text-slate-400 font-mono">App: ${s.appNo} &bull; ${s.comm}</p>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${netPayable === 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+              ${netPayable === 0 ? 'GOVT SETTLED' : 'PARTIAL DUE'}
+            </span>
+          </div>
+
+          <div class="bg-slate-50 p-2.5 rounded-xl grid grid-cols-3 gap-2 text-center text-xs">
+            <div>
+              <span class="text-[9px] uppercase font-bold text-slate-400 block">Base</span>
+              <span class="font-mono font-semibold text-slate-600">₹55K</span>
+            </div>
+            <div>
+              <span class="text-[9px] uppercase font-bold text-slate-400 block">Concession</span>
+              <span class="font-mono font-semibold text-emerald-600">-₹${concession / 1000}K</span>
+            </div>
+            <div>
+              <span class="text-[9px] uppercase font-bold text-slate-400 block">Payable</span>
+              <span class="font-mono font-black text-slate-900">₹${netPayable.toLocaleString('en-IN')}</span>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-500 italic text-right">${note}</p>
+        `;
+        mContainer.appendChild(card);
+      });
+
+      // Desktop table
+      const tbody = document.getElementById('fee-table-body');
+      tbody.innerHTML = '';
       students.forEach(s => {
         let concession = 0;
         let note = "Standard Fee";
@@ -588,14 +866,14 @@
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50 transition';
         tr.innerHTML = `
-          <td class="py-3 px-4 font-semibold text-slate-800">${s.name}</td>
-          <td class="py-3 px-4 text-xs">${note}</td>
+          <td class="py-3 px-4 font-bold text-slate-900">${s.name}</td>
+          <td class="py-3 px-4 text-xs font-semibold text-slate-600">${note}</td>
           <td class="py-3 px-4 font-mono text-xs">₹${baseTuition.toLocaleString('en-IN')}</td>
-          <td class="py-3 px-4 font-mono text-xs text-emerald-600">-₹${concession.toLocaleString('en-IN')}</td>
-          <td class="py-3 px-4 font-mono text-xs font-bold text-slate-900">₹${netPayable.toLocaleString('en-IN')}</td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${netPayable === 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-              ${netPayable === 0 ? 'GOVT SETTLED' : 'PARTIAL DUE'}
+          <td class="py-3 px-4 font-mono text-xs text-emerald-600 font-bold">-₹${concession.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 font-mono text-xs font-black text-slate-900">₹${netPayable.toLocaleString('en-IN')}</td>
+          <td class="py-3 px-4 text-center">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${netPayable === 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+              ${netPayable === 0 ? 'SETTLED' : 'PARTIAL DUE'}
             </span>
           </td>
         `;
@@ -603,33 +881,39 @@
       });
     }
 
+    // RENDER REPRESENTATIVES
     function renderReps() {
       const container = document.getElementById('reps-container');
       container.innerHTML = '';
       const reps = students.filter(s => s.rep);
       reps.forEach(r => {
         const div = document.createElement('div');
-        div.className = 'bg-white/10 rounded-lg p-3 backdrop-blur-sm border border-white/20';
+        div.className = 'bg-white/10 rounded-xl p-2.5 sm:p-3 backdrop-blur-sm border border-white/20 flex items-center space-x-2.5';
         div.innerHTML = `
-          <div class="flex items-center space-x-2">
-            <div class="w-8 h-8 rounded-full bg-white text-brand-700 font-bold flex items-center justify-center text-xs">
-              ${r.name[0]}
-            </div>
-            <div>
-              <p class="font-bold text-xs text-white leading-tight">${r.name}</p>
-              <p class="text-[10px] text-white/80 font-mono">${r.mobile}</p>
-            </div>
+          <div class="w-8 h-8 rounded-full bg-white text-brand-700 font-black flex items-center justify-center text-xs shrink-0 shadow-xs">
+            ${r.name[0]}
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="font-bold text-xs text-white truncate leading-tight">${r.name}</p>
+            <a href="tel:${r.mobile}" class="text-[10px] text-white/80 font-mono hover:underline flex items-center mt-0.5">
+              <i data-lucide="phone" class="w-2.5 h-2.5 mr-1"></i>${r.mobile}
+            </a>
           </div>
         `;
         container.appendChild(div);
       });
+      lucide.createIcons();
     }
 
+    // SEARCH & FILTER LOGIC
     function filterStudents() {
-      const query = document.getElementById('search-input').value.toLowerCase();
+      const query = document.getElementById('search-input').value.trim().toLowerCase();
       const comm = document.getElementById('filter-community').value;
       const res = document.getElementById('filter-residence').value;
       const sch = document.getElementById('filter-scholarship').value;
+
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) clearBtn.classList.toggle('hidden', query.length === 0);
 
       const filtered = students.filter(s => {
         const matchesQuery = s.name.toLowerCase().includes(query) || s.appNo.includes(query) || s.mobile.includes(query);
@@ -650,16 +934,22 @@
       renderDirectory(filtered);
     }
 
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      filterStudents();
+    }
+
+    // ATTENDANCE LOGIC
     function togglePresent(appNo) {
       const s = students.find(item => item.appNo === appNo);
       if (s) {
         s.presentToday = !s.presentToday;
         if (s.presentToday) {
           s.attendedClasses++;
-          logBiometric(s.name, s.appNo, 'Turnstile Check-In [ACCESS GRANTED]');
+          logBiometric(s.name, s.appNo, 'Turnstile Check-In [GRANTED]');
         } else {
-          s.attendedClasses--;
-          logBiometric(s.name, s.appNo, 'Check-Out / Manual Revert');
+          s.attendedClasses = Math.max(0, s.attendedClasses - 1);
+          logBiometric(s.name, s.appNo, 'Check-Out / Revert');
         }
         persist();
         renderAttendance();
@@ -673,7 +963,7 @@
       });
       persist();
       renderAttendance();
-      logBiometric('BATCH ACTION', 'IT-B', status ? 'All students scanned IN via Bulk RFID' : 'Daily register reset');
+      logBiometric('BATCH ACTION', 'IT-B', status ? 'All 61 Scanned Present via RFID' : 'Daily register cleared');
     }
 
     function simulateRandomScan() {
@@ -683,18 +973,19 @@
       student.attendedClasses++;
       persist();
       renderAttendance();
-      logBiometric(student.name, student.appNo, 'Biometric Turnstile Verified (Thumbprint #04)');
+      logBiometric(student.name, student.appNo, 'Turnstile Tap (Gate Sensor #02)');
     }
 
     function logBiometric(name, id, action) {
       const feed = document.getElementById('terminal-feed');
-      const time = new Date().toLocaleTimeString();
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const p = document.createElement('p');
-      p.className = 'text-xs border-l-2 border-brand-500 pl-2';
-      p.innerHTML = `<span class="text-slate-500">[${time}]</span> <strong class="text-emerald-400">${name}</strong> (${id}) - ${action}`;
+      p.className = 'text-[11px] border-l-2 border-brand-500 pl-2 leading-relaxed animate-in fade-in duration-150';
+      p.innerHTML = `<span class="text-slate-500">[${time}]</span> <strong class="text-emerald-400">${name}</strong> <span class="text-slate-400">(${id})</span>: ${action}`;
       feed.prepend(p);
     }
 
+    // PROFILE MODAL
     function viewProfile(appNo) {
       const s = students.find(item => item.appNo === appNo);
       if (!s) return;
@@ -702,27 +993,38 @@
       document.getElementById('modal-name').innerText = s.name;
       document.getElementById('modal-appno').innerText = s.appNo;
       document.getElementById('modal-community').innerText = s.comm;
-      document.getElementById('modal-phone').innerText = s.mobile;
+      
+      const phoneLink = document.getElementById('modal-phone-link');
+      phoneLink.innerText = s.mobile;
+      phoneLink.href = `tel:${s.mobile}`;
+
       document.getElementById('modal-residence').innerText = s.hostel || 'Day Scholar';
       document.getElementById('modal-avatar').innerText = s.name.charAt(0);
 
       const pct = Math.round((s.attendedClasses / s.totalClasses) * 100);
-      document.getElementById('modal-attendance').innerText = `${pct}% (${s.attendedClasses}/${s.totalClasses} sessions)`;
+      document.getElementById('modal-attendance').innerText = `${pct}% (${s.attendedClasses}/${s.totalClasses})`;
 
       const tagContainer = document.getElementById('modal-tags');
       tagContainer.innerHTML = '';
-      if (s.rep) tagContainer.innerHTML += '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Class Rep</span>';
-      if (s.pmss) tagContainer.innerHTML += '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">PMSS</span>';
-      if (s.sevenFive) tagContainer.innerHTML += '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">7.5% Quota</span>';
-      if (s.fg) tagContainer.innerHTML += '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">First Graduate</span>';
+      if (s.rep) tagContainer.innerHTML += '<span class="px-2 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-200">Class Rep</span>';
+      if (s.pmss) tagContainer.innerHTML += '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">PMSS Scheme</span>';
+      if (s.sevenFive) tagContainer.innerHTML += '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">7.5% Quota</span>';
+      if (s.fg) tagContainer.innerHTML += '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">First Graduate</span>';
 
       document.getElementById('student-modal').classList.remove('hidden');
+      lucide.createIcons();
     }
 
     function closeModal() {
       document.getElementById('student-modal').classList.add('hidden');
     }
 
+    // Close modal on escape or outer click
+    document.getElementById('student-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'student-modal') closeModal();
+    });
+
+    // CSV EXPORT
     function exportCSV() {
       let csv = "SNo,ApplicationNo,Name,Community,Mobile,Branch,PMSS,7.5_Quota,FirstGraduate,Residence,Representative\n";
       students.forEach(s => {
@@ -732,11 +1034,13 @@
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.setAttribute('href', url);
-      a.setAttribute('download', 'IT_Section_B_Students_Master.csv');
+      a.setAttribute('download', 'RVSCE_IT_Section_B_Master.csv');
       a.click();
     }
 
+    // CHARTS INITIALIZATION (Responsive & Aspect Ratio Aware)
     function initCharts() {
+      // 1. Community breakdown
       const commCounts = { 'BC': 0, 'MBC/DNC': 0, 'SC': 0, 'SCA': 0, 'BCM': 0 };
       students.forEach(s => {
         if (commCounts[s.comm] !== undefined) commCounts[s.comm]++;
@@ -748,20 +1052,25 @@
         data: {
           labels: Object.keys(commCounts),
           datasets: [{
-            label: 'Students Count',
+            label: 'Headcount',
             data: Object.values(commCounts),
             backgroundColor: ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'],
-            borderRadius: 6
+            borderRadius: 8
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, ticks: { stepSize: 5 } } }
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 5 } }
+          }
         }
       });
 
+      // 2. Scholarship breakdown
       let pmssCount = students.filter(s => s.pmss).length;
       let sevenFiveCount = students.filter(s => s.sevenFive).length;
       let fgCount = students.filter(s => s.fg).length;
@@ -771,7 +1080,7 @@
       new Chart(schCtx, {
         type: 'doughnut',
         data: {
-          labels: ['PMSS Scheme (22)', '7.5% Govt Quota (10)', 'First Graduate (24)', 'General (5)'],
+          labels: ['PMSS (22)', '7.5% Quota (10)', 'First Grad (24)', 'General (5)'],
           datasets: [{
             data: [pmssCount, sevenFiveCount, fgCount, generalCount],
             backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#94a3b8'],
@@ -782,8 +1091,12 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          cutout: '68%',
           plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+            legend: {
+              position: 'bottom',
+              labels: { boxWidth: 10, font: { size: 10 } }
+            }
           }
         }
       });
